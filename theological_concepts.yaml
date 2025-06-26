@@ -1,0 +1,239 @@
+# Theological Concepts Configuration
+# Edit this file to add, remove, or modify theological concepts for indexing
+
+theological_concepts:
+  
+  # Godly Attributes
+  trinity_deity:
+    - God
+    - Father
+    - Son
+    - Holy Spirit
+    - Trinity
+    - Jesus
+    - Christ
+    - Lord
+    - Yahweh
+    - Jehovah
+    - Almighty
+    - Deity
+    - Divine
+  
+  # Salvation and Redemption
+  salvation_redemption:
+    - salvation
+    - redemption
+    - deliverance
+    - grace
+    - mercy
+    - forgiveness
+    - atonement
+    - justification
+    - sanctification
+    - regeneration
+    - born again
+  
+  # Biblical Concepts
+  biblical_concepts:
+    - sin
+    - healing
+    - righteousness
+    - faith
+    - love
+    - hope
+    - peace
+    - joy
+    - prayer
+    - worship
+    - praise
+    - glory
+    - blessing
+    - covenant
+  
+  # Eschatology
+  eschatology:
+    - Tribulation
+    - Prophecy
+    - Rapture
+    - Resurrection
+    - Judgement
+    - Judgment
+    - Heaven
+    - Hell
+    - Eternal
+    - Kingdom
+    - Amillennialism
+    - Second Coming
+    - Millennium
+    - Revelation
+    - Antichrist
+    - Eschatology
+    - Gnosticism 
+  
+  # Church and Ministry
+  church_ministry:
+    - church
+    - ministry
+    - Evangelist
+    - Apostle
+    - Pastor
+    - Elder
+    - Deacon
+    - baptism
+    - communion
+    - fellowship
+    - discipleship
+    - evangelism
+    - mission
+  
+  # Biblical Books
+  biblical_books:
+    - Genesis
+    - Exodus
+    - Deuteronomy
+    - Judges
+    - Ruth
+    - Samuel
+    - Kings
+    - Chronicles
+    - Ezra
+    - Nehemiah
+    - Ester
+    - Job
+    - Ecclesiastes
+    - Songs
+    - Lamentations
+    - Ezekiel
+    - Daniel
+    - Hosea
+    - Joel
+    - Amos
+    - Obadiah
+    - Jonah
+    - Micah
+    - Nahum
+    - Habakkuk
+    - Zephaniah
+    - Haggai
+    - Zecariah
+    - Malachi
+    - Joshua
+    - Leviticus
+    - Psalms
+    - Proverbs
+    - Isaiah
+    - Jeremiah
+    - Matthew
+    - Mark
+    - Luke
+    - John
+    - Acts
+    - Romans
+    - Corinthians
+    - Galatians
+    - Ephesians
+    - Philippians
+    - Colossians
+    - Thessalonians
+    - Timothy
+    - Titus
+    - Philemon
+    - Hebrews
+    - James
+    - Jude
+    - Peter
+    - Revelation
+  
+  # Biblical Characters
+  biblical_characters:
+    - Moses
+    - David
+    - Saul
+    - Solomon
+    - Paul
+    - Peter
+    - Abraham
+    - Isaac
+    - Jacob
+    - Noah
+    - Elijah
+    - Ezekiel
+    - Samuel
+    - Isaiah
+    - Jeremiah
+    - Jesus
+    - Stephen
+    - Adam
+    - Eve
+    - Caan
+    - Abel
+    - John
+    - Mary Magdalene
+    - Judas Iscariot
+    - Mary (mother of Jesus)
+    - Thomas
+    - Luke
+    - Philip
+    - John the Baptist
+    - Isaac
+    - Jacob
+    - Joseph
+    - Sarah
+    - Samson
+    - Timothy
+    - Nicodemus
+    - Job
+  
+  # Theological Terms
+  theological_terms:
+    - scripture
+    - bible
+    - word
+    - gospel
+    - truth
+    - doctrine
+    - theology
+    - hermeneutics
+    - exegesis
+    - interpretation
+    - inspiration
+    - inerrancy
+    - authority
+    - canon 
+  
+  # Compound Concepts (multi-word phrases)
+  compound_concepts:
+    - Holy Spirit
+    - Jesus Christ
+    - Lord Jesus
+    - Son of God
+    - Word of God
+    - Kingdom of God
+    - Kingdom of Heaven
+    - Second Coming
+    - Born Again
+    - Holy Ghost
+    - Lamb of God
+    - Bread of Life
+    - Good Shepherd
+    - Prince of Peace
+    - Bible Chronology
+    - John the Baptist
+   
+
+# Configuration options
+config:
+  # Case sensitivity for matching
+  case_sensitive: false
+  
+  # Maximum number of context snippets to store per concept
+  max_context_snippets: 10
+  
+  # Maximum number of matches to process per concept per document
+  max_matches_per_concept: 10
+  
+  # Minimum word length for concept matching
+  min_word_length: 3
+  
+  # Whether to match whole words only
+  whole_words_only: true

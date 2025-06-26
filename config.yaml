@@ -1,0 +1,70 @@
+# Document Database Configuration
+
+# Database Settings
+database:
+  vector_db_path: "./data/vector_db"
+  metadata_db_path: "./data/metadata.db"
+  batch_size: 100
+  max_chunk_size: 1000
+  chunk_overlap: 200
+
+# Ollama Settings
+ollama:
+  base_url: "http://localhost:11434"
+  model: "llama3.2:3b"  # Fast and efficient for document Q&A
+  temperature: 0.1
+  max_tokens: 1024  # Reduced for faster responses
+  context_window: 4096
+  # Model options (by speed):
+  # "llama3.2:3b" - Very fast (2GB) - Current choice
+  # "mistral:latest" - Good balance (4.1GB)
+  # "mixtral:latest" - Highest quality but slower (26GB)
+
+# Document Processing
+document_processing:
+  supported_formats:
+    - ".txt"
+    - ".pdf"
+    - ".doc"
+    - ".docx"
+    - ".csv"
+  input_folder: "./data/documents"
+  max_file_size_mb: 100
+
+# Embedding Settings
+embeddings:
+  model: "sentence-transformers/all-MiniLM-L6-v2"
+  device: "auto"  # auto, cpu, cuda
+  batch_size: 32
+  similarity_threshold: 0.85  # For deduplication
+
+# Performance Settings
+performance:
+  max_workers: 4  # Number of CPU cores to use
+  use_gpu: true
+  memory_limit_gb: 8
+
+# Output Settings
+output:
+  default_output_folder: "./output"
+  include_sources: true
+  max_results: 10
+
+# Web Interface
+web:
+  host: "127.0.0.1"
+  port: 5000
+  debug: false
+
+# Terminal Interface
+terminal:
+  history_file: "./.doc_db_history"
+  auto_save_queries: true
+  pager: true
+
+# Logging
+logging:
+  level: "INFO"
+  file: "./logs/app.log"
+  max_size_mb: 10
+  backup_count: 5
