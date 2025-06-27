@@ -32,6 +32,7 @@ This project aims to create a comprehensive document management system using Pyt
 - **output**: Folder for query results
 - **web**: Web GUI files
 - **process_new_documents.py**: Script to process new documents
+- **merge_pdfs.py**: Utility to merge multiple PDF files into one
 - **tests**: Test cases for the system
 
 ## Getting Started
@@ -87,4 +88,35 @@ This project aims to create a comprehensive document management system using Pyt
 Check logs at `./logs/document_processing.log` for detailed processing information.
 
 ### 📖 For detailed instructions, see [ADDING_DOCUMENTS.md](./ADDING_DOCUMENTS.md)
+
+## Utilities
+
+### PDF Merger (merge_pdfs.py)
+
+A utility script to merge multiple PDF files into a single document.
+
+**Usage:**
+
+```bash
+# Merge specific PDF files
+./merge_pdfs.py file1.pdf file2.pdf file3.pdf -o merged_output.pdf
+
+# Merge all PDFs in a directory (with natural sorting)
+./merge_pdfs.py -d /path/to/pdfs -o merged_output.pdf
+
+# Use different sorting methods
+./merge_pdfs.py -d /path/to/pdfs -s alphabetical -o output.pdf
+./merge_pdfs.py -d /path/to/pdfs -s modified -o output.pdf
+
+# Use file patterns
+./merge_pdfs.py -d /path/to/pdfs -p "chapter*.pdf" -o book.pdf
+```
+
+**Features:**
+- Natural number sorting (file1.pdf, file2.pdf, file10.pdf)
+- Multiple sorting options (natural, alphabetical, modification time)
+- File pattern matching
+- Progress reporting with page counts
+- Error handling for corrupted PDFs
+- Automatic output path resolution
 
