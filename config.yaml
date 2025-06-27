@@ -2,8 +2,18 @@
 
 # Database Settings
 database:
+  # Base paths for multi-database system (configurable)
+  base_databases_dir: "./databases"  # Base directory for all databases
+  vector_db_subdir: "vector_db"      # Subdirectory for vector database
+  metadata_db_filename: "metadata.db" # Metadata database filename
+  documents_subdir: "documents"       # Subdirectory for input documents
+  output_subdir: "output"            # Subdirectory for output files
+  
+  # Legacy single-database paths (for backwards compatibility)
   vector_db_path: "./data/vector_db"
   metadata_db_path: "./data/metadata.db"
+  
+  # Processing settings
   batch_size: 100
   max_chunk_size: 1000
   chunk_overlap: 200

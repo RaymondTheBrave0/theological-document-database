@@ -1,0 +1,26 @@
+# Database Registry - No hard-coded paths
+# Paths are generated dynamically from base configuration
+
+databases:
+  '1001':
+    name: "Tim Warner Teaching"
+    description: "This is all of the great articles, blog entries, PDFs and his LGV bible Translations"
+    created_date: '2025-06-27'
+    
+  '1002':
+    name: "General Christian Teaching"
+    description: "This is all of the great articles, blog entries, PDFs and that I have come across in all my years of research"
+    created_date: '2025-06-27'
+    
+  '1003':
+    name: "Eschatology"
+    description: "This has all the articles, blog entries, PDFs and that I have come across linked to Eschatology"
+    created_date: '2025-06-27'
+    
+  '1004':
+    name: "Islamic End Times"
+    description: "This has all the articles, blog entries, PDFs and that I have come across linked to Islamic End Times Paradigm"
+    created_date: '2025-06-27'
+default_database: 1001
+registry_version: '1.0'
+last_updated: '2025-06-27T13:51:02.023037'

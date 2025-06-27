@@ -20,6 +20,7 @@ from src.initialize_database import initialize_database
 from src.document_processor import DocumentProcessor
 from src.theological_indexer import TheologicalIndexer
 from src.scripture_indexer import ScriptureIndexer
+from src.database_config import get_database_config, add_database_args, handle_database_selection, DatabaseConfig
 
 def setup_logging():
     """Set up logging configuration"""
@@ -172,7 +173,28 @@ def main():
                        help='Clear existing data and process all documents from scratch')
     parser.add_argument('--force', action='store_true',
                        help='Force processing without confirmation')
+    
+    # Add database selection arguments
+    add_database_args(parser)
     args = parser.parse_args()
+    
+    # Handle database selection
+    requested_db_id = handle_database_selection(args)
+    if requested_db_id is None and hasattr(args, 'list_databases') and args.list_databases:
+        return 0  # Exit after listing databases
+    
+    try:
+        # Get database-specific configuration
+        config, db_id = get_database_config(requested_db_id)
+        
+        # Print database information
+        db_config = DatabaseConfig()
+        db_config.print_database_summary(db_id)
+        
+    except Exception as e:
+        print(f"❌ Database configuration error: {e}")
+        print("💡 Use 'manage_databases.py list' to see available databases")
+        return 1
     
     # Ensure logs directory exists
     os.makedirs('logs', exist_ok=True)
@@ -183,10 +205,6 @@ def main():
     start_time = datetime.now()
     
     try:
-        # Load configuration
-        with open('config.yaml', 'r') as f:
-            config = yaml.safe_load(f)
-        
         # Initialize database manager
         db_manager = initialize_database(config)
         
