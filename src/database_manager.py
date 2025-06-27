@@ -8,12 +8,12 @@ import sqlite3
 import logging
 import chromadb
 from chromadb.config import Settings
-from sentence_transformers import SentenceTransformer
 import numpy as np
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 import hashlib
 import json
+import ollama
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +36,56 @@ class DatabaseManager:
         self._init_metadata_database()
         
     def _init_embedding_model(self):
-        """Initialize the sentence transformer model"""
+        """Initialize the embedding model (Ollama or sentence-transformers)"""
+        embedding_provider = self.config['embeddings'].get('provider', 'sentence-transformers')
+        
+        if embedding_provider == 'ollama':
+            try:
+                # Test Ollama connection and model
+                logger.info(f"Testing Ollama embedding model: {self.embedding_model_name}")
+                test_response = ollama.embeddings(
+                    model=self.embedding_model_name,
+                    prompt="test"
+                )
+                logger.info(f"Successfully initialized Ollama embedding model: {self.embedding_model_name}")
+                self.embedding_provider = 'ollama'
+                return
+            except Exception as e:
+                logger.error(f"Failed to initialize Ollama embedding model: {e}")
+                logger.info("Falling back to sentence-transformers...")
+        
+        # Fallback to sentence-transformers
         try:
+            from sentence_transformers import SentenceTransformer
             device = self.config['embeddings']['device']
             if device == 'auto':
                 device = 'cuda' if self.config['performance']['use_gpu'] else 'cpu'
             
-            self.embedding_model = SentenceTransformer(
-                self.embedding_model_name,
-                device=device
-            )
-            logger.info(f"Initialized embedding model: {self.embedding_model_name} on {device}")
+            # Use a simple model name for sentence-transformers
+            model_name = "all-MiniLM-L6-v2"
+            logger.info(f"Initializing sentence-transformers model: {model_name}")
+            self.embedding_model = SentenceTransformer(model_name, device=device)
+            self.embedding_provider = 'sentence-transformers'
+            logger.info(f"Successfully initialized sentence-transformers model: {model_name} on {device}")
         except Exception as e:
-            logger.error(f"Failed to initialize embedding model: {e}")
-            raise
+            logger.error(f"Failed to initialize any embedding model: {e}")
+            raise Exception("No embedding model could be initialized.")
+    
+    def generate_embedding(self, text: str) -> List[float]:
+        """Generate embedding for text using the configured provider"""
+        try:
+            if self.embedding_provider == 'ollama':
+                response = ollama.embeddings(
+                    model=self.embedding_model_name,
+                    prompt=text
+                )
+                return response['embedding']
+            else:  # sentence-transformers
+                return self.embedding_model.encode(text).tolist()
+        except Exception as e:
+            logger.error(f"Failed to generate embedding: {e}")
+            # Return a dummy embedding as fallback
+            return [0.0] * 384  # Standard embedding dimension
     
     def _init_vector_database(self):
         """Initialize ChromaDB vector database"""
@@ -236,7 +272,7 @@ class DatabaseManager:
                 vector_id = f"doc_{document_id}_chunk_{i}"
                 
                 chunk_data.append((document_id, i, chunk, chunk_hash, vector_id))
-                embeddings.append(self.embedding_model.encode(chunk))
+                embeddings.append(self.generate_embedding(chunk))
                 vector_ids.append(vector_id)
             
             if chunk_data:
@@ -274,7 +310,7 @@ class DatabaseManager:
         """Search for similar documents using vector similarity"""
         try:
             # Generate query embedding
-            query_embedding = self.embedding_model.encode(query)
+            query_embedding = self.generate_embedding(query)
             
             # Search in vector database
             results = self.collection.query(

@@ -33,7 +33,8 @@ document_processing:
 
 # Embedding Settings
 embeddings:
-  model: "sentence-transformers/all-MiniLM-L6-v2"
+  model: "nomic-embed-text:latest"  # Use local Ollama embedding model
+  provider: "ollama"  # ollama or sentence-transformers
   device: "auto"  # auto, cpu, cuda
   batch_size: 32
   similarity_threshold: 0.85  # For deduplication
