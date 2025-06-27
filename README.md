@@ -151,6 +151,52 @@ Access each database at:
 - Eschatology: http://localhost:5001  
 - Islamic End Times: http://localhost:5002
 
+## Terminal Interface
+
+### Interactive Terminal Queries
+```bash
+# Start interactive terminal with default database
+./query_documents.py
+
+# Use specific database
+./query_documents.py --db-id 1003
+
+# Single query mode
+./query_documents.py -q "salvation doctrine"
+
+# List available databases
+./query_documents.py --list-databases
+
+# Disable AI responses (faster)
+./query_documents.py --db-id 1003 --no-ai
+
+# Save results to specific file
+./query_documents.py -q "eschatology" -o results.txt
+```
+
+### Terminal Features
+- **Interactive Mode**: Rich terminal interface with command history
+- **AI Responses**: Automatic AI-powered answers (can be disabled)
+- **Auto-Save**: Results automatically saved to files
+- **Database Selection**: Choose theological database via `--db-id`
+- **Scripture Search**: Use `scripture:John 3:16` for specific references
+- **Concept Search**: Use `concept:salvation` for theological concepts
+- **Query History**: View and replay previous searches
+- **Rich Formatting**: Colored output with tables and panels
+
+### Terminal Commands
+Once in interactive mode:
+- Type your query naturally
+- `help` - Show available commands
+- `history` - View recent queries
+- `stats` - Database statistics
+- `scripture:reference` - Search scripture references
+- `concept:term` - Search theological concepts
+- `scripture-stats` - Scripture indexing statistics
+- `concept-stats` - Theological concept statistics
+- `clear` - Clear screen
+- `exit` - Quit application
+
 ## Utilities
 
 ### PDF Merger (merge_pdfs.py)

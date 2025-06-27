@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from src.initialize_database import initialize_database
 from src.query_engine import QueryEngine
+from src.database_config import add_database_args, handle_database_selection, get_database_config, DatabaseConfig
 
 class TerminalInterface:
     """Interactive terminal interface for document database queries"""
