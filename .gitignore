@@ -74,6 +74,9 @@ Thumbs.db
 # Test documents and processing files
 test_processing/
 
+# Multi-database system files
+databases/
+
 # Configuration files with sensitive data
 config_local.yaml
 .env
