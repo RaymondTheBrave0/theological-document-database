@@ -66,20 +66,6 @@ def index():
     """Main page"""
     return render_template('index.html')
 
-@app.route('/api/stats')
-def get_stats():
-    """Get database statistics"""
-    try:
-        stats = db_manager.get_database_stats()
-        return jsonify({
-            'success': True,
-            'data': stats
-        })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
 
 @app.route('/api/query', methods=['POST'])
 def query_documents():

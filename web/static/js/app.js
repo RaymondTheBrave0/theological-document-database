@@ -4,8 +4,7 @@ const socket = io();
 
 // Run when the DOM is ready
 document.addEventListener("DOMContentLoaded", function() {
-    // Load initial stats and history
-    updateStats();
+    // Load initial history
     updateHistory();
 
     // Handle query form submission
@@ -14,35 +13,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("export-confirm").addEventListener("click", exportResults);
 });
 
-// Update database statistics
-function updateStats() {
-    fetch("/api/stats")
-        .then(handleFetchResponse)
-        .then(data => {
-            const container = document.getElementById("stats-container");
-            container.innerHTML = `
-                <div class="stat-item">
-                    <div class="stat-number">${data.document_count}</div>
-                    <div class="stat-label">Documents</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${data.chunk_count}</div>
-                    <div class="stat-label">Chunks</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${data.vector_count}</div>
-                    <div class="stat-label">Vectors</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">${formatBytes(data.total_file_size)}</div>
-                    <div class="stat-label">Total Size</div>
-                </div>
-            `;
-        })
-        .catch(error => {
-            console.error("Error fetching stats:", error);
-        });
-}
 
 // Update query history
 function updateHistory() {
