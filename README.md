@@ -110,6 +110,9 @@ A utility script to merge multiple PDF files into a single document.
 
 # Use file patterns
 ./merge_pdfs.py -d /path/to/pdfs -p "chapter*.pdf" -o book.pdf
+
+# Skip pages with minimal content (header-only pages)
+./merge_pdfs.py -d /path/to/pdfs --header-lines 2 -o clean_output.pdf
 ```
 
 **Features:**
@@ -119,4 +122,12 @@ A utility script to merge multiple PDF files into a single document.
 - Progress reporting with page counts
 - Error handling for corrupted PDFs
 - Automatic output path resolution
+- Header content filtering (skip pages with minimal content beyond headers)
+
+**Header Removal:**
+The `--header-lines` option helps filter out pages that contain mostly header content:
+- Analyzes text content of each page
+- Skips pages with very few lines (indicating header-only content)
+- Useful for removing title pages, chapter dividers, or pages with only headers
+- Set to 2-3 for typical header removal needs
 

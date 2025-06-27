@@ -10,10 +10,67 @@ import argparse
 import re
 from pathlib import Path
 import PyPDF2
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.units import inch
+import io
 
-def merge_pdfs(input_files, output_file):
+def merge_pdfs(input_files, output_file, header_lines=0):
     """Merge multiple PDF files into one"""
     pdf_writer = PyPDF2.PdfWriter()
+    
+    def create_page_with_header_removed(page, header_lines=0):
+        """Create a new page with header lines removed but keeping lesson title"""
+        if header_lines <= 0:
+            return page
+            
+        try:
+            # Extract text from the page
+            text = page.extract_text()
+            lines = text.split('\n')
+            
+            # Remove the first N lines but preserve lesson title (typically 3rd line)
+            # Skip first 2 lines (institute name, module info) but keep lesson title
+            if len(lines) > header_lines and header_lines >= 2:
+                # Keep lesson title (3rd line) and everything after header_lines
+                lesson_title = lines[2] if len(lines) > 2 else ""
+                remaining_content = lines[header_lines:]
+                
+                # Reconstruct content with lesson title at the top
+                if lesson_title.strip() and "lesson" in lesson_title.lower():
+                    new_lines = [lesson_title] + remaining_content
+                else:
+                    new_lines = remaining_content
+                    
+                new_text = '\n'.join(new_lines)
+                
+                # Create a new PDF page with the processed text
+                packet = io.BytesIO()
+                can = canvas.Canvas(packet, pagesize=letter)
+                width, height = letter
+                
+                # Write text to new page
+                y_position = height - 50
+                for line in new_lines:
+                    if line.strip():
+                        can.drawString(50, y_position, line.strip()[:100])  # Limit line length
+                        y_position -= 15
+                        if y_position < 50:
+                            break
+                            
+                can.save()
+                packet.seek(0)
+                
+                # Create new PDF page
+                new_pdf = PyPDF2.PdfReader(packet)
+                return new_pdf.pages[0]
+                
+        except Exception as e:
+            print(f"     Warning: Could not process header removal: {e}")
+            
+        return page
     
     print(f"Merging {len(input_files)} PDF files...")
     
@@ -25,11 +82,25 @@ def merge_pdfs(input_files, output_file):
                 pdf_reader = PyPDF2.PdfReader(pdf_file)
                 
                 # Add all pages from this PDF
+                pages_added = 0
                 for page_num in range(len(pdf_reader.pages)):
                     page = pdf_reader.pages[page_num]
-                    pdf_writer.add_page(page)
                     
-                print(f"     Added {len(pdf_reader.pages)} pages")
+                    # Process page to remove header lines if requested
+                    if header_lines > 0:
+                        processed_page = create_page_with_header_removed(page, header_lines)
+                        pdf_writer.add_page(processed_page)
+                        print(f"     Added page {page_num + 1} (header lines removed)")
+                    else:
+                        pdf_writer.add_page(page)
+                        
+                    pages_added += 1
+                    
+                total_pages = len(pdf_reader.pages)
+                if header_lines > 0:
+                    print(f"     Added {pages_added}/{total_pages} pages (skipped {total_pages - pages_added} header-only pages)")
+                else:
+                    print(f"     Added {pages_added} pages")
                 
         except Exception as e:
             print(f"     ❌ Error processing {file_path}: {e}")
@@ -84,6 +155,7 @@ def main():
     parser.add_argument('-p', '--pattern', default='*.pdf', help='File pattern (when using directory)')
     parser.add_argument('-s', '--sort', choices=['natural', 'alphabetical', 'modified'], 
                        default='natural', help='Sorting method (default: natural - handles numbers correctly)')
+    parser.add_argument('-hl', '--header-lines', type=int, default=0, help='Number of header lines to strip from each page')
     
     args = parser.parse_args()
     
@@ -125,7 +197,7 @@ def main():
         print(f"  {i}. {os.path.basename(file_path)}")
     
     # Merge PDFs
-    success = merge_pdfs(valid_files, args.output)
+    success = merge_pdfs(valid_files, args.output, args.header_lines)
     return 0 if success else 1
 
 if __name__ == '__main__':
