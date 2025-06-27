@@ -125,9 +125,9 @@ A utility script to merge multiple PDF files into a single document.
 - Header content filtering (skip pages with minimal content beyond headers)
 
 **Header Removal:**
-The `--header-lines` option helps filter out pages that contain mostly header content:
-- Analyzes text content of each page
-- Skips pages with very few lines (indicating header-only content)
-- Useful for removing title pages, chapter dividers, or pages with only headers
-- Set to 2-3 for typical header removal needs
+The `--header-lines` option removes the first N lines from each page:
+- Simply skips the first N lines of text content from each page
+- Useful for removing institutional headers, module names, etc.
+- Preserves all remaining content exactly as it appears
+- Example: `--header-lines 2` removes first 2 lines, keeps everything else
 

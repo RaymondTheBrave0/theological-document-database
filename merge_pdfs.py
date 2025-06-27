@@ -22,7 +22,7 @@ def merge_pdfs(input_files, output_file, header_lines=0):
     pdf_writer = PyPDF2.PdfWriter()
     
     def create_page_with_header_removed(page, header_lines=0):
-        """Create a new page with header lines removed but keeping lesson title"""
+        """Create a new page with the first N header lines removed"""
         if header_lines <= 0:
             return page
             
@@ -31,20 +31,9 @@ def merge_pdfs(input_files, output_file, header_lines=0):
             text = page.extract_text()
             lines = text.split('\n')
             
-            # Remove the first N lines but preserve lesson title (typically 3rd line)
-            # Skip first 2 lines (institute name, module info) but keep lesson title
-            if len(lines) > header_lines and header_lines >= 2:
-                # Keep lesson title (3rd line) and everything after header_lines
-                lesson_title = lines[2] if len(lines) > 2 else ""
-                remaining_content = lines[header_lines:]
-                
-                # Reconstruct content with lesson title at the top
-                if lesson_title.strip() and "lesson" in lesson_title.lower():
-                    new_lines = [lesson_title] + remaining_content
-                else:
-                    new_lines = remaining_content
-                    
-                new_text = '\n'.join(new_lines)
+            # Skip the first N lines
+            if len(lines) > header_lines:
+                new_lines = lines[header_lines:]
                 
                 # Create a new PDF page with the processed text
                 packet = io.BytesIO()
