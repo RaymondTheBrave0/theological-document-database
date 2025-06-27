@@ -354,20 +354,9 @@ def main():
     port = config['web']['port']
     debug = config['web']['debug']
     
-    print(f"Server running at http://{host}:{port}")
-    print("Press Ctrl+C to stop")
     
-    # Temporarily redirect stderr to suppress Flask's own output
-    old_stderr = sys.stderr
-    sys.stderr = open(os.devnull, 'w')
-    
-    try:
-        # Run the application with all output suppressed
-        socketio.run(app, host=host, port=port, debug=debug, log_output=False)
-    finally:
-        # Restore stderr
-        sys.stderr.close()
-        sys.stderr = old_stderr
+    # Run the application
+    socketio.run(app, host=host, port=port, debug=debug, log_output=False)
 
 if __name__ == '__main__':
     main()
