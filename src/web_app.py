@@ -56,7 +56,7 @@ def initialize_app():
         document_processor = DocumentProcessor(config, db_manager)
         
         print("✓ Web application initialized successfully")
-        
+                
     except Exception as e:
         print(f"❌ Failed to initialize web application: {e}")
         sys.exit(1)
@@ -335,17 +335,39 @@ def main():
     """Main entry point"""
     initialize_app()
     
+    # Suppress Flask startup messages completely
+    import logging
+    import sys
+    import os
+    
+    # Suppress werkzeug and Flask logging
+    werkzeug_logger = logging.getLogger('werkzeug')
+    werkzeug_logger.setLevel(logging.ERROR)
+    werkzeug_logger.disabled = True
+    
+    flask_logger = logging.getLogger('flask')
+    flask_logger.setLevel(logging.ERROR)
+    flask_logger.disabled = True
+    
     # Get host and port from config
     host = config['web']['host']
     port = config['web']['port']
     debug = config['web']['debug']
     
-    print(f"Starting Document Database Web Interface...")
-    print(f"URL: http://{host}:{port}")
-    print(f"Ready for queries!")
+    print(f"Server running at http://{host}:{port}")
+    print("Press Ctrl+C to stop")
     
-    # Run the application
-    socketio.run(app, host=host, port=port, debug=debug)
+    # Temporarily redirect stderr to suppress Flask's own output
+    old_stderr = sys.stderr
+    sys.stderr = open(os.devnull, 'w')
+    
+    try:
+        # Run the application with all output suppressed
+        socketio.run(app, host=host, port=port, debug=debug, log_output=False)
+    finally:
+        # Restore stderr
+        sys.stderr.close()
+        sys.stderr = old_stderr
 
 if __name__ == '__main__':
     main()
