@@ -4,7 +4,8 @@ const socket = io();
 
 // Run when the DOM is ready
 document.addEventListener("DOMContentLoaded", function() {
-    // Load initial history
+    // Load database info and initial history
+    loadDatabaseInfo();
     updateHistory();
 
     // Handle query form submission
@@ -12,6 +13,35 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("clear-btn").addEventListener("click", clearQuery);
     document.getElementById("export-confirm").addEventListener("click", exportResults);
 });
+
+// Load and display database information
+function loadDatabaseInfo() {
+    fetch('/api/database-info')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const dbInfo = data.data;
+                const databaseName = document.getElementById('database-name');
+                if (databaseName) {
+                    databaseName.textContent = `${dbInfo.database_name} (${dbInfo.database_id})`;
+                    databaseName.title = dbInfo.database_description;
+                }
+            } else {
+                console.error('Failed to load database info:', data.error);
+                const databaseName = document.getElementById('database-name');
+                if (databaseName) {
+                    databaseName.textContent = 'Unknown Database';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading database info:', error);
+            const databaseName = document.getElementById('database-name');
+            if (databaseName) {
+                databaseName.textContent = 'Error Loading';
+            }
+        });
+}
 
 
 // Update query history

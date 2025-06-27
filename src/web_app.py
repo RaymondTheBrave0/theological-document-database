@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from src.initialize_database import initialize_database
 from src.query_engine import QueryEngine
 from src.document_processor import DocumentProcessor
+from src.database_config import get_database_config, DatabaseConfig
 
 # Initialize Flask app
 app = Flask(__name__, 
@@ -40,15 +41,17 @@ config = None
 USE_AI_DEFAULT = True
 AUTO_SAVE_DEFAULT = True
 
-def initialize_app():
-    """Initialize the application components"""
+def initialize_app(db_id=None):
+    """Initialize the application components with multi-database support"""
     global db_manager, query_engine, document_processor, config
     
     try:
-        # Load configuration
-        config_path = Path(__file__).parent.parent / 'config.yaml'
-        with open(config_path, 'r') as f:
-            config = yaml.safe_load(f)
+        # Get database-specific configuration
+        config, resolved_db_id = get_database_config(db_id)
+        
+        # Print database information
+        db_config = DatabaseConfig()
+        db_config.print_database_summary(resolved_db_id)
         
         # Initialize components
         db_manager = initialize_database(config)
@@ -56,9 +59,11 @@ def initialize_app():
         document_processor = DocumentProcessor(config, db_manager)
         
         print("✓ Web application initialized successfully")
+        return resolved_db_id
                 
     except Exception as e:
         print(f"❌ Failed to initialize web application: {e}")
+        print("💡 Use 'manage_databases.py list' to see available databases")
         sys.exit(1)
 
 @app.route('/')
@@ -118,6 +123,26 @@ def query_documents():
             }
         })
         
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/database-info')
+def get_database_info():
+    """Get current database information"""
+    try:
+        return jsonify({
+            'success': True,
+            'data': {
+                'database_id': config['database']['database_id'],
+                'database_name': config['database']['database_name'],
+                'database_description': config['database']['database_description'],
+                'document_folder': config['document_processing']['input_folder'],
+                'stats': db_manager.get_database_stats() if db_manager else None
+            }
+        })
     except Exception as e:
         return jsonify({
             'success': False,

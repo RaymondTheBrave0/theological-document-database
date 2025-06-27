@@ -37,9 +37,27 @@ This project aims to create a comprehensive document management system using Pyt
 
 ## Getting Started
 
-- **Setup Environment**: Instructions to set up the development environment
-- **Run Tests**: Instructions to execute test cases
-- **Deployment**: Steps to deploy the application
+### Quick Start Guide
+1. **Setup Databases**: Use `./manage_databases.py list` to see available databases
+2. **Process Documents**: `./process_new_documents.py --db-id 1001`
+3. **Start Web Interface**: `./start_web.py --db-id 1001`
+4. **Terminal Interface**: `./query_documents.py --db-id 1001` (if available)
+
+### Multi-Database Usage
+```bash
+# List available databases
+./manage_databases.py list
+
+# Process documents for specific database
+./process_new_documents.py --db-id 1003  # Eschatology
+
+# Start web interface for specific database
+./start_web.py --db-id 1003 --port 5001
+
+# Multiple databases can run simultaneously on different ports
+./start_web.py --db-id 1001 --port 5000  # Tim Warner Teaching
+./start_web.py --db-id 1002 --port 5001  # General Christian Teaching
+```
 
 ## Adding New Documents
 
@@ -88,6 +106,50 @@ This project aims to create a comprehensive document management system using Pyt
 Check logs at `./logs/document_processing.log` for detailed processing information.
 
 ### 📖 For detailed instructions, see [ADDING_DOCUMENTS.md](./ADDING_DOCUMENTS.md)
+
+## Web Interface
+
+### Starting the Web Interface
+```bash
+# Start with default database
+./start_web.py
+
+# Start with specific database
+./start_web.py --db-id 1003
+
+# Custom host/port
+./start_web.py --db-id 1001 --host 0.0.0.0 --port 8080
+
+# List available databases
+./start_web.py --list-databases
+```
+
+### Web Interface Features
+- **Modern Bootstrap UI**: Clean, responsive interface
+- **Database Selection**: Shows current database in navigation
+- **AI-Powered Search**: Automatic AI responses (like terminal interface)
+- **Auto-Save Results**: Query results automatically saved to files
+- **Query History**: View recent searches
+- **Real-time Interface**: Socket.IO for live updates
+- **Export Functionality**: Save results in multiple formats
+
+### Multiple Database Instances
+You can run multiple web interfaces simultaneously:
+```bash
+# Terminal 1: Tim Warner Teaching on port 5000
+./start_web.py --db-id 1001 --port 5000
+
+# Terminal 2: Eschatology on port 5001  
+./start_web.py --db-id 1003 --port 5001
+
+# Terminal 3: Islamic End Times on port 5002
+./start_web.py --db-id 1004 --port 5002
+```
+
+Access each database at:
+- Tim Warner: http://localhost:5000
+- Eschatology: http://localhost:5001  
+- Islamic End Times: http://localhost:5002
 
 ## Utilities
 
