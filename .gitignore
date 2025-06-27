@@ -36,6 +36,9 @@ data/metadata.db-*
 # Document files (potentially large)
 data/documents/
 data/vectors/
+data/vector_db/
+data/chroma/
+data/embeddings/
 
 # Logs
 logs/
@@ -67,3 +70,15 @@ Thumbs.db
 # Model files (can be large)
 *.model
 *.bin
+
+# Test documents and processing files
+test_processing/
+
+# Configuration files with sensitive data
+config_local.yaml
+.env
+*.secret
+
+# Backup files
+*.bak
+*.backup
