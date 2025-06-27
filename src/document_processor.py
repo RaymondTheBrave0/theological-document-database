@@ -80,6 +80,58 @@ class DocumentProcessor:
                         
         logger.info(f"Processing complete: {processed_count} files processed, {skipped_count} files skipped, {error_count} errors")
 
+    def process_specific_files(self, file_paths: List[str], force: bool = False):
+        """Process a specific list of files."""
+        processed_count = 0
+        skipped_count = 0
+        error_count = 0
+        
+        for file_path in file_paths:
+            if not os.path.exists(file_path):
+                logger.warning(f"File {file_path} does not exist")
+                error_count += 1
+                continue
+                
+            if not self.is_supported(file_path):
+                logger.warning(f"File format not supported: {file_path}")
+                error_count += 1
+                continue
+                
+            # Check if document is already processed (unless force is True)
+            if not force and self.db_manager.is_document_already_processed(file_path):
+                logger.info(f"Skipping already processed file: {os.path.basename(file_path)}")
+                skipped_count += 1
+                continue
+                
+            logger.info(f"Processing file: {os.path.basename(file_path)}")
+            try:
+                doc_text = self.extract_text(file_path)
+                if not doc_text.strip():
+                    logger.warning(f"No text extracted from {file_path}")
+                    error_count += 1
+                    continue
+                    
+                chunks = self.chunk_text(doc_text)
+                if not chunks:
+                    logger.warning(f"No chunks created from {file_path}")
+                    error_count += 1
+                    continue
+                    
+                result = self.db_manager.add_document(file_path, os.path.basename(file_path), self.get_file_type(file_path), chunks)
+                if result:
+                    processed_count += 1
+                    logger.info(f"Successfully processed file: {os.path.basename(file_path)} ({len(chunks)} chunks)")
+                else:
+                    error_count += 1
+                    logger.error(f"Failed to add file: {os.path.basename(file_path)} to database")
+                    
+            except Exception as e:
+                error_count += 1
+                logger.error(f"Failed to process file: {os.path.basename(file_path)}: {e}")
+                
+        logger.info(f"Specific file processing complete: {processed_count} files processed, {skipped_count} files skipped, {error_count} errors")
+        return {"processed": processed_count, "skipped": skipped_count, "errors": error_count}
+
     def is_supported(self, file_path: str) -> bool:
         """Check if the file format is supported."""
         return any(file_path.endswith(ext) for ext in SUPPORTED_FORMATS)
