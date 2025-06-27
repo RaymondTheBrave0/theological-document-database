@@ -340,9 +340,9 @@ def main():
     port = config['web']['port']
     debug = config['web']['debug']
     
-    print(f"🌐 Starting Document Database Web Interface...")
-    print(f"📍 URL: http://{host}:{port}")
-    print(f"🔍 Ready for queries!")
+    print(f"Starting Document Database Web Interface...")
+    print(f"URL: http://{host}:{port}")
+    print(f"Ready for queries!")
     
     # Run the application
     socketio.run(app, host=host, port=port, debug=debug)
