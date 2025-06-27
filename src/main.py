@@ -59,7 +59,6 @@ def main():
         stats = db_manager.get_database_stats()
         console.print(f"\n[green]Database processed successfully![/green]")
         console.print(f"Documents: {stats['document_count']}")
-        console.print(f"Chunks: {stats['chunk_count']}")
         console.print(f"Vectors: {stats['vector_count']}")
         console.print(f"Total file size: {stats['total_file_size']} bytes")
 

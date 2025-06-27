@@ -68,8 +68,7 @@ def test_processing_pipeline(file_path):
                 chunk = " ".join(words[start:end])
                 chunks.append(chunk)
             
-            print(f"Generated chunks: {len(chunks)}")
-            print(f"First chunk length: {len(chunks[0]) if chunks else 0} characters")
+            # Chunks generated for processing
             
             return text, chunks
         else:

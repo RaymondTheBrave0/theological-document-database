@@ -229,7 +229,7 @@ class DatabaseManager:
             
             for i, chunk in enumerate(chunks):
                 if self.is_chunk_duplicate(chunk):
-                    logger.info(f"Skipping duplicate chunk {i+1} from {filename}")
+                    # Skipping duplicate chunk
                     continue
                 
                 chunk_hash = self.calculate_text_hash(chunk)
@@ -263,7 +263,7 @@ class DatabaseManager:
             conn.commit()
             conn.close()
             
-            logger.info(f"Added document {filename} with {len(chunk_data)} chunks")
+            logger.info(f"Added document {filename}")
             return document_id
             
         except Exception as e:

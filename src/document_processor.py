@@ -120,7 +120,7 @@ class DocumentProcessor:
                 result = self.db_manager.add_document(file_path, os.path.basename(file_path), self.get_file_type(file_path), chunks)
                 if result:
                     processed_count += 1
-                    logger.info(f"Successfully processed file: {os.path.basename(file_path)} ({len(chunks)} chunks)")
+                    logger.info(f"Successfully processed file: {os.path.basename(file_path)}")
                 else:
                     error_count += 1
                     logger.error(f"Failed to add file: {os.path.basename(file_path)} to database")

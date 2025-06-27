@@ -133,9 +133,8 @@ def main():
         
         # Double check by showing some stats
         stats = db_manager.get_database_stats()
-        print(f"\nDatabase stats:")
+        print(f"Database stats:")
         print(f"- Document count: {stats.get('document_count', 'N/A')}")
-        print(f"- Chunk count: {stats.get('chunk_count', 'N/A')}")
         print(f"- Vector count: {stats.get('vector_count', 'N/A')}")
 
 if __name__ == "__main__":

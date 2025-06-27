@@ -35,7 +35,6 @@ def test_database_init():
         
         print("✓ Database stats retrieved:")
         print(f"  - Documents: {stats['document_count']}")
-        print(f"  - Chunks: {stats['chunk_count']}")
         print(f"  - Vectors: {stats['vector_count']}")
         print(f"  - Total file size: {stats['total_file_size']} bytes")
         

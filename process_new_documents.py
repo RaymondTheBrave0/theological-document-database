@@ -259,7 +259,6 @@ def main():
         print("DOCUMENT PROCESSING SUMMARY")
         print("="*60)
         print(f"Documents processed: {final_stats['document_count']}")
-        print(f"Text chunks created: {final_stats['chunk_count']}")
         print(f"Vector embeddings: {final_stats['vector_count']}")
         
         if theological_success:
