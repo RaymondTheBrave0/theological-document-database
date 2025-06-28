@@ -53,12 +53,13 @@ class MultiDatabaseTerminalInterface(TerminalInterface):
         banner_text = Text(f"Document Database Query System", style="bold blue")
         stats = self.db_manager.get_database_stats()
         
+        # Convert bytes to megabytes
+        total_size_mb = stats['total_file_size'] / (1024 * 1024)
+
         info_text = f"""
 🗄️  Database: {self.database_name} ({self.db_id})
 📚 Documents: {stats['document_count']}
-📄 Chunks: {stats['chunk_count']}
-🔍 Vectors: {stats['vector_count']}
-💾 Total Size: {stats['total_file_size']} bytes
+💾 Total Size: {total_size_mb:.2f} MB
 
 Commands:
 • Type your query to search documents

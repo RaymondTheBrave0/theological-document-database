@@ -180,19 +180,22 @@ class QueryEngine:
         context = "\n".join(enhanced_context_parts)
         
         # Create prompt for Ollama
-        prompt = f"""Based on the following documents from a document database, please answer the user's question. 
-Only use information that is explicitly contained in the provided documents. If the documents don't contain enough information to answer the question, please say so.
+        prompt = f"""You are a document analysis assistant. Answer the user's question using the information provided in the context below. Be comprehensive and helpful while staying within the bounds of the provided content.
 
-When Bible references are mentioned, include both the reference and the actual scripture text in your response.
+GUIDELINES:
+- Base your answer primarily on the information provided in the context below
+- When citing information, reference the actual document filenames (e.g., "As explained in 'My Father Scriptures.docx'...")
+- Do NOT use phrases like "the documents suggest", "according to the documents", "the documents state"
+- Answer directly and naturally using the provided information
+- If the context provides relevant information but not a complete answer, work with what's available and indicate where information might be limited
+- Only say you don't have enough information if the context is completely unrelated to the question
 
-IMPORTANT: When referencing documents in your answer, always use the actual document filenames (e.g., "According to 'My Father Scriptures.docx'...") rather than generic numbers like "Document 1" or "Document 2".
-
-Context from documents:
+Context from sources:
 {context}
 
 User question: {query}
 
-Please provide a comprehensive answer based only on the information in the documents above. Include references to the actual document filenames and any Bible verses that support the answer."""
+Provide a comprehensive answer based on the information provided above."""
 
         try:
             # Generate response using Ollama

@@ -198,43 +198,6 @@ Commands:
             )
             self.console.print(llm_panel)
         
-        # Show search results
-        if response['search_results']:
-            self.console.print(f"\n[bold cyan]Search Results[/bold cyan] ({len(response['search_results'])} found)")
-            
-            # Create table with or without document column
-            table = Table(show_header=True, header_style="bold magenta", width=120)
-            if show_sources:
-                table.add_column("Document", width=25, no_wrap=False)
-                table.add_column("Requested Answers", width=90, no_wrap=False)
-            else:
-                table.add_column("Requested Answers", width=115, no_wrap=False)
-            
-            for i, result in enumerate(response['search_results'], 1):
-                filename = result['metadata']['filename']
-                
-                # Extract complete paragraphs or full sentences
-                full_content = self._extract_full_content(
-                    result['content'], response['query']
-                )
-                
-                if show_sources:
-                    table.add_row(filename, full_content)
-                else:
-                    table.add_row(full_content)
-            
-            self.console.print(table)
-            
-            # Show sources summary if enabled
-            if show_sources and response.get('sources_used'):
-                self.console.print(f"\n[bold yellow]Sources:[/bold yellow]")
-                for source in response['sources_used']:
-                    self.console.print(f"• {source['filename']}")
-            
-            # Show execution time
-            self.console.print(f"\n[dim]Execution time: {response['execution_time']:.3f} seconds[/dim]")
-        else:
-            self.console.print("[red]No results found[/red]")
     
     def _extract_full_content(self, content: str, query: str) -> str:
         """Extract full sentences or paragraphs containing the query context"""
@@ -518,30 +481,6 @@ Commands:
             )
             self.console.print(llm_panel)
         
-        # Show search results
-        if response['search_results']:
-            self.console.print(f"\n[bold cyan]Filtered Search Results[/bold cyan] ({len(response['search_results'])} found)")
-            
-            table = Table(show_header=True, header_style="bold magenta", width=120)
-            table.add_column("Document", width=25, no_wrap=False)
-            table.add_column("Requested Answers", width=90, no_wrap=False)
-            
-            for i, result in enumerate(response['search_results'], 1):
-                filename = result['metadata']['filename']
-                
-                # Extract complete paragraphs or full sentences
-                full_content = self._extract_full_content(
-                    result['content'], response['query']
-                )
-                
-                table.add_row(filename, full_content)
-            
-            self.console.print(table)
-            
-            # Show execution time
-            self.console.print(f"\n[dim]Execution time: {response['execution_time']:.3f} seconds[/dim]")
-        else:
-            self.console.print("[red]No results found in documents containing the specified scripture[/red]")
     
     def process_concept_query(self, concept: str):
         """Process a theological concept search"""
