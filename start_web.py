@@ -37,9 +37,6 @@ def main():
         # Initialize app with selected database
         db_id = initialize_app(requested_db_id)
         
-        print(f"🌐 Starting web interface for database {db_id}")
-        print("   Access your document database at:")
-        
         # Get configuration - we need to import here after initialization
         from src.web_app import config
         
@@ -48,24 +45,25 @@ def main():
         port = args.port or config['web']['port']
         debug = args.debug or config['web']['debug']
         
-        print(f"   → http://{host}:{port}")
-        print("\n🔍 Features available:")
-        print("   • Document search with AI responses")
-        print("   • Query history")
-        print("   • Auto-save results")
-        print("   • Real-time interface")
-        print("\n💡 Use Ctrl+C to stop the server")
-        print("="*50)
+        print(f"🌐 Web interface started: http://{host}:{port}")
         
-        # Suppress Flask startup messages
+        # Suppress all Flask and debug messages
         import logging
-        werkzeug_logger = logging.getLogger('werkzeug')
-        werkzeug_logger.setLevel(logging.ERROR)
-        werkzeug_logger.disabled = True
+        import sys
+        import os
         
-        flask_logger = logging.getLogger('flask')
-        flask_logger.setLevel(logging.ERROR)
-        flask_logger.disabled = True
+        # Redirect stderr to suppress warnings
+        original_stderr = sys.stderr
+        sys.stderr = open(os.devnull, 'w')
+        
+        # Suppress all Flask-related logging
+        logging.getLogger().setLevel(logging.CRITICAL)
+        logging.getLogger('werkzeug').setLevel(logging.CRITICAL)
+        logging.getLogger('werkzeug').disabled = True
+        logging.getLogger('flask').setLevel(logging.CRITICAL)
+        logging.getLogger('flask').disabled = True
+        logging.getLogger('socketio').setLevel(logging.CRITICAL)
+        logging.getLogger('engineio').setLevel(logging.CRITICAL)
         
         # Start the web application
         socketio.run(app, host=host, port=port, debug=debug, log_output=False)

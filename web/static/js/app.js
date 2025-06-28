@@ -75,7 +75,7 @@ function handleQuery(event) {
     // Fetch data
     const queryInput = document.getElementById("query-input").value.trim();
     const useLlm = true;  // Always true like terminal interface
-    const topK = parseInt(document.getElementById("top-k").value);
+    const topK = 10;  // Fixed value since no user selection
 
     if (!queryInput) {
         alert("Please enter a query.");
@@ -159,62 +159,6 @@ function displayResults(data) {
                 <div class="card-body">
                     <div class="ai-response-content">${formatTextWithLineBreaks(data.llm_response)}</div>
                 </div>
-            </div>
-        `;
-    }
-
-    // Search Results (without rank/similarity, full content like terminal)
-    if (data.search_results.length > 0) {
-        resultsContainer.innerHTML += `
-            <div class="card mb-4 fade-in">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Search Results (${data.search_results.length} found)</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-striped mb-0">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th style="width: 25%">Document</th>
-                                    <th style="width: 75%">Requested Answers</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${data.search_results.map(result => `
-                                    <tr>
-                                        <td class="fw-bold text-break">${result.metadata.filename}</td>
-                                        <td class="text-break">${formatTextWithLineBreaks(result.full_content || result.content)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Show sources list
-        if (data.sources_used && data.sources_used.length > 0) {
-            resultsContainer.innerHTML += `
-                <div class="card mb-4 fade-in">
-                    <div class="card-header bg-warning text-dark">
-                        <h6 class="mb-0"><i class="fas fa-list me-2"></i>Sources</h6>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled mb-0">
-                            ${data.sources_used.map(source => `
-                                <li><i class="fas fa-file-alt me-2"></i>${source.filename}</li>
-                            `).join('')}
-                        </ul>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Show execution time
-        resultsContainer.innerHTML += `
-            <div class="text-muted text-center mb-3">
-                <small><i class="fas fa-clock me-1"></i>Execution time: ${data.execution_time.toFixed(3)} seconds</small>
             </div>
         `;
     } else {

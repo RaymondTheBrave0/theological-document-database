@@ -91,16 +91,7 @@ def query_documents():
         # Process query
         response = query_engine.query(query_text, use_llm=use_llm, top_k=top_k)
         
-        # Extract full content for each result (like terminal interface)
-        enhanced_results = []
-        for result in response['search_results']:
-            enhanced_result = result.copy()
-            enhanced_result['full_content'] = _extract_full_content(
-                result['content'], query_text
-            )
-            enhanced_results.append(enhanced_result)
-        
-        response['search_results'] = enhanced_results
+        # Note: Search results are not sent to frontend (AI response only)
         
         # Auto-save results if enabled
         saved_filename = None
@@ -115,9 +106,7 @@ def query_documents():
             'data': {
                 'query': response['query'],
                 'llm_response': response['llm_response'],
-                'search_results': response['search_results'],
                 'execution_time': response['execution_time'],
-                'sources_used': response['sources_used'],
                 'saved_filename': saved_filename,
                 'auto_save_enabled': auto_save
             }
@@ -360,19 +349,27 @@ def main():
     """Main entry point"""
     initialize_app()
     
-    # Suppress Flask startup messages completely
+    # Suppress all Flask startup messages and debug output
     import logging
     import sys
     import os
     
-    # Suppress werkzeug and Flask logging
-    werkzeug_logger = logging.getLogger('werkzeug')
-    werkzeug_logger.setLevel(logging.ERROR)
-    werkzeug_logger.disabled = True
+    # Set all logging to critical level
+    logging.getLogger().setLevel(logging.CRITICAL)
     
-    flask_logger = logging.getLogger('flask')
-    flask_logger.setLevel(logging.ERROR)
-    flask_logger.disabled = True
+    # Suppress all Flask-related loggers
+    for logger_name in ['werkzeug', 'flask', 'flask.app', 'socketio', 'engineio']:
+        logger = logging.getLogger(logger_name)
+        logger.setLevel(logging.CRITICAL)
+        logger.disabled = True
+        logger.propagate = False
+    
+    # Redirect stdout/stderr to suppress debug prints
+    if not debug:
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+        sys.stdout = open(os.devnull, 'w')
+        sys.stderr = open(os.devnull, 'w')
     
     # Get host and port from config
     host = config['web']['host']
