@@ -45,28 +45,29 @@ def main():
         port = args.port or config['web']['port']
         debug = args.debug or config['web']['debug']
         
-        print(f"🌐 Web interface started: http://{host}:{port}")
-        
-        # Suppress all Flask and debug messages
+        # Suppress ALL Flask output before printing anything
         import logging
         import sys
         import os
+        from contextlib import redirect_stdout, redirect_stderr
         
-        # Redirect stderr to suppress warnings
-        original_stderr = sys.stderr
-        sys.stderr = open(os.devnull, 'w')
+        # Completely disable all logging
+        logging.disable(logging.CRITICAL)
         
-        # Suppress all Flask-related logging
-        logging.getLogger().setLevel(logging.CRITICAL)
-        logging.getLogger('werkzeug').setLevel(logging.CRITICAL)
-        logging.getLogger('werkzeug').disabled = True
-        logging.getLogger('flask').setLevel(logging.CRITICAL)
-        logging.getLogger('flask').disabled = True
-        logging.getLogger('socketio').setLevel(logging.CRITICAL)
-        logging.getLogger('engineio').setLevel(logging.CRITICAL)
+        # Suppress all Flask-related loggers  
+        for logger_name in ['werkzeug', 'flask', 'flask.app', 'socketio', 'engineio', 'urllib3']:
+            logger = logging.getLogger(logger_name)
+            logger.setLevel(logging.CRITICAL)
+            logger.disabled = True
+            logger.propagate = False
         
-        # Start the web application
-        socketio.run(app, host=host, port=port, debug=debug, log_output=False)
+        print(f"🌐 Web interface started: http://{host}:{port}")
+        
+        # Redirect both stdout and stderr to suppress ALL Flask messages
+        with open(os.devnull, 'w') as devnull:
+            with redirect_stdout(devnull), redirect_stderr(devnull):
+                # Start the web application with all output suppressed
+                socketio.run(app, host=host, port=port, debug=False, log_output=False, use_reloader=False)
         
     except KeyboardInterrupt:
         print("\n👋 Web server stopped")

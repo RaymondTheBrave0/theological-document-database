@@ -271,20 +271,56 @@ Commands:
             return content[:300] + "..."
     
     def save_results(self, response: dict):
-        """Save query results to file"""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        query_safe = "".join(c for c in response['query'][:20] if c.isalnum() or c in (' ', '-', '_')).strip()
-        filename = f"query_{query_safe}_{timestamp}.txt"
+        """Save query results to daily file"""
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        filename = f"queries_{date_str}.txt"
         output_path = Path(self.config['output']['default_output_folder']) / filename
         
         try:
-            success = self.query_engine.export_query_results(response, str(output_path), 'text')
+            success = self._append_to_daily_file(response, str(output_path))
             if success:
-                self.console.print(f"[green]Results saved to:[/green] {output_path}")
+                self.console.print(f"[green]Results saved to:[/green] {filename}")
             else:
                 self.console.print("[red]Failed to save results[/red]")
         except Exception as e:
             self.console.print(f"[red]Error saving results: {e}[/red]")
+    
+    def _append_to_daily_file(self, response_data: dict, file_path: str) -> bool:
+        """Append query results to daily file"""
+        try:
+            # Ensure output directory exists
+            Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+            
+            # Check if file exists to determine if we need a header
+            file_exists = Path(file_path).exists()
+            
+            with open(file_path, 'a', encoding='utf-8') as f:
+                # Add date header for new files
+                if not file_exists:
+                    f.write(f"Document Database Query Log - {datetime.now().strftime('%Y-%m-%d')}\n")
+                    f.write("=" * 80 + "\n\n")
+                
+                # Add timestamp and query
+                timestamp = datetime.now().strftime('%H:%M:%S')
+                f.write(f"[{timestamp}] Query: {response_data['query']}\n")
+                f.write(f"Execution Time: {response_data['execution_time']:.3f} seconds\n")
+                f.write("-" * 60 + "\n")
+                
+                # Add AI response if available
+                if response_data.get('llm_response'):
+                    f.write("AI Response:\n")
+                    f.write(response_data['llm_response'])
+                    f.write("\n")
+                else:
+                    f.write("No AI response generated.\n")
+                
+                f.write("\n" + "=" * 80 + "\n\n")
+            
+            return True
+            
+        except Exception as e:
+            logging.error(f"Failed to append to daily file: {e}")
+            return False
     
     def show_help(self):
         """Display help information"""

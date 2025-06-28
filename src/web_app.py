@@ -330,20 +330,53 @@ def _extract_full_content(content: str, query: str) -> str:
         return content[:300] + "..."
 
 def _auto_save_results(response_data: dict) -> str:
-    """Auto-save query results to file and return filename"""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    query_safe = "".join(c for c in response_data['query'][:20] if c.isalnum() or c in (' ', '-', '_')).strip()
-    filename = f"query_{query_safe}_{timestamp}.txt"
+    """Auto-save query results to daily file and return filename"""
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    filename = f"web_queries_{date_str}.txt"
     output_path = Path(config['output']['default_output_folder']) / filename
     
     # Ensure output directory exists
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
-    success = query_engine.export_query_results(response_data, str(output_path), 'text')
+    success = _append_to_daily_file(response_data, str(output_path))
     if success:
         return filename
     else:
         raise Exception("Failed to save results")
+
+def _append_to_daily_file(response_data: dict, file_path: str) -> bool:
+    """Append query results to daily file"""
+    try:
+        # Check if file exists to determine if we need a header
+        file_exists = Path(file_path).exists()
+        
+        with open(file_path, 'a', encoding='utf-8') as f:
+            # Add date header for new files
+            if not file_exists:
+                f.write(f"Document Database Web Query Log - {datetime.now().strftime('%Y-%m-%d')}\n")
+                f.write("=" * 80 + "\n\n")
+            
+            # Add timestamp and query
+            timestamp = datetime.now().strftime('%H:%M:%S')
+            f.write(f"[{timestamp}] Web Query: {response_data['query']}\n")
+            f.write(f"Execution Time: {response_data['execution_time']:.3f} seconds\n")
+            f.write("-" * 60 + "\n")
+            
+            # Add AI response if available
+            if response_data.get('llm_response'):
+                f.write("AI Response:\n")
+                f.write(response_data['llm_response'])
+                f.write("\n")
+            else:
+                f.write("No AI response generated.\n")
+            
+            f.write("\n" + "=" * 80 + "\n\n")
+        
+        return True
+        
+    except Exception as e:
+        print(f"Failed to append to daily file: {e}")
+        return False
 
 def main():
     """Main entry point"""
@@ -364,21 +397,25 @@ def main():
         logger.disabled = True
         logger.propagate = False
     
-    # Redirect stdout/stderr to suppress debug prints
-    if not debug:
-        original_stdout = sys.stdout
-        original_stderr = sys.stderr
-        sys.stdout = open(os.devnull, 'w')
-        sys.stderr = open(os.devnull, 'w')
-    
     # Get host and port from config
     host = config['web']['host']
     port = config['web']['port']
     debug = config['web']['debug']
     
-    
-    # Run the application
-    socketio.run(app, host=host, port=port, debug=debug, log_output=False)
+    # Redirect all output to suppress any remaining messages
+    with open(os.devnull, 'w') as devnull:
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+        sys.stdout = devnull
+        sys.stderr = devnull
+        
+        try:
+            # Run the application with all output suppressed
+            socketio.run(app, host=host, port=port, debug=False, log_output=False, use_reloader=False)
+        finally:
+            # Restore output streams
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
 
 if __name__ == '__main__':
     main()
