@@ -2,16 +2,24 @@
 
 const socket = io();
 
+// Query history for arrow key navigation
+let queryHistory = [];
+let historyIndex = -1;
+
 // Run when the DOM is ready
 document.addEventListener("DOMContentLoaded", function() {
-    // Load database info and initial history
+    // Load database info and history for arrow key navigation
     loadDatabaseInfo();
-    updateHistory();
+    loadQueryHistory();
 
     // Handle query form submission
     document.getElementById("query-form").addEventListener("submit", handleQuery);
     document.getElementById("clear-btn").addEventListener("click", clearQuery);
     document.getElementById("export-confirm").addEventListener("click", exportResults);
+    
+    // Add arrow key navigation to query input
+    const queryInput = document.getElementById("query-input");
+    queryInput.addEventListener("keydown", handleQueryInputKeydown);
 });
 
 // Load and display database information
@@ -44,28 +52,62 @@ function loadDatabaseInfo() {
 }
 
 
-// Update query history
-function updateHistory() {
+// Load query history for arrow key navigation (no visual display)
+function loadQueryHistory() {
     fetch("/api/history")
         .then(handleFetchResponse)
         .then(history => {
-            const container = document.getElementById("history-container");
-            if (history.length === 0) {
-                container.innerHTML = "<small class='text-muted'>No query history available</small>";
-            } else {
-                container.innerHTML = history.map(entry => `
-                    <div class="history-item">
-                        <div class="history-query"><strong>${entry.query}</strong></div>
-                        <div class="history-meta">
-                            ${entry.results_count} results • ${entry.execution_time.toFixed(2)}s
-                        </div>
-                    </div>
-                `).join("");
-            }
+            // Extract just the query strings for navigation
+            queryHistory = history.map(entry => entry.query).reverse(); // Most recent first
+            historyIndex = -1; // Reset index
         })
         .catch(error => {
-            console.error("Error fetching history:", error);
+            console.error("Error loading query history:", error);
+            queryHistory = [];
         });
+}
+
+// Handle arrow key navigation in query input
+function handleQueryInputKeydown(event) {
+    const queryInput = event.target;
+    
+    // Only handle arrow keys when cursor is at beginning/end of textarea
+    if (event.key === 'ArrowUp') {
+        // Navigate to previous query (if at beginning of textarea)
+        if (queryInput.selectionStart === 0 && queryInput.selectionEnd === 0) {
+            event.preventDefault();
+            if (historyIndex < queryHistory.length - 1) {
+                historyIndex++;
+                queryInput.value = queryHistory[historyIndex];
+                // Move cursor to end
+                setTimeout(() => {
+                    queryInput.setSelectionRange(queryInput.value.length, queryInput.value.length);
+                }, 0);
+            }
+        }
+    } else if (event.key === 'ArrowDown') {
+        // Navigate to next query (if at end of textarea)
+        const atEnd = queryInput.selectionStart === queryInput.value.length && 
+                     queryInput.selectionEnd === queryInput.value.length;
+        if (atEnd) {
+            event.preventDefault();
+            if (historyIndex > 0) {
+                historyIndex--;
+                queryInput.value = queryHistory[historyIndex];
+            } else if (historyIndex === 0) {
+                historyIndex = -1;
+                queryInput.value = ''; // Clear input when going past most recent
+            }
+            // Move cursor to end
+            setTimeout(() => {
+                queryInput.setSelectionRange(queryInput.value.length, queryInput.value.length);
+            }, 0);
+        }
+    } else if (event.key === 'Enter' && !event.shiftKey) {
+        // Submit form on Enter (without Shift)
+        event.preventDefault();
+        document.getElementById('query-form').dispatchEvent(new Event('submit'));
+    }
 }
 
 // Handle query submissions
@@ -104,7 +146,8 @@ function handleQuery(event) {
     .then(handleFetchResponse)
     .then(data => {
         displayResults(data);
-        updateHistory();
+        // Refresh query history for arrow key navigation
+        loadQueryHistory();
         
         // Show auto-save notification if file was saved
         if (data.saved_filename) {

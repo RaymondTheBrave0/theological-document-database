@@ -37,25 +37,8 @@
     <!-- Main Container -->
     <div class="container-fluid mt-4">
         <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3">
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history me-2"></i>Query History
-                        </h5>
-                    </div>
-                    <div class="card-body" id="history-container">
-                        <div class="text-center">
-                            <small class="text-muted">Recent queries will appear here</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Content -->
-            <div class="col-md-9">
+            <!-- Main Content (Full Width) -->
+            <div class="col-12">
                 <!-- Query Interface -->
                 <div class="card mb-4">
                     <div class="card-header">
@@ -68,7 +51,7 @@
                             <div class="mb-3">
                                 <label for="query-input" class="form-label">Enter your question</label>
                                 <textarea class="form-control" id="query-input" rows="3" 
-                                         placeholder="What would you like to know about your documents?"></textarea>
+                                         placeholder="What would you like to know about your documents? (Use ↑↓ arrows for query history)"></textarea>
                             </div>
                             
                             <div class="row mb-3">
