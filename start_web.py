@@ -152,7 +152,7 @@ def main():
         with open(os.devnull, 'w') as devnull:
             with redirect_stdout(devnull), redirect_stderr(devnull):
                 # Start the web application with all output suppressed
-                socketio.run(app, host=host, port=port, debug=False, log_output=False, use_reloader=False)
+                socketio.run(app, host=host, port=port, debug=False, log_output=False, use_reloader=False, allow_unsafe_werkzeug=True)
         
     except KeyboardInterrupt:
         print("\n👋 Web server stopped")

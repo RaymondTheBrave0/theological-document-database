@@ -6,11 +6,15 @@ const socket = io();
 let queryHistory = [];
 let historyIndex = -1;
 
+// Bible books mapping (loaded from API)
+let bibleBookMap = {};
+
 // Run when the DOM is ready
 document.addEventListener("DOMContentLoaded", function() {
     // Load database info and history for arrow key navigation
     loadDatabaseInfo();
     loadQueryHistory();
+    loadBibleBooks();
 
     // Handle query form submission
     document.getElementById("query-form").addEventListener("submit", handleQuery);
@@ -20,6 +24,16 @@ document.addEventListener("DOMContentLoaded", function() {
     // Add arrow key navigation to query input
     const queryInput = document.getElementById("query-input");
     queryInput.addEventListener("keydown", handleQueryInputKeydown);
+    
+    // Add event delegation for Bible reference clicks
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('bible-reference')) {
+            const reference = event.target.getAttribute('data-verse-ref');
+            if (reference) {
+                showVersePopup(reference);
+            }
+        }
+    });
 });
 
 // Load and display database information
@@ -204,6 +218,8 @@ function displayResults(data) {
                 </div>
             </div>
         `;
+        
+        // Bible references are now handled by our custom popup system
     } else {
         resultsContainer.innerHTML += `
             <div class="alert alert-warning fade-in" role="alert">
@@ -245,12 +261,36 @@ function toggleProgress(show) {
     }
 }
 
+// Load Bible books from API
+function loadBibleBooks() {
+    fetch('/api/bible-books')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                bibleBookMap = data.data;
+                console.log('Bible books loaded:', Object.keys(bibleBookMap).length, 'entries');
+            } else {
+                console.warn('Failed to load Bible books:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading Bible books:', error);
+        });
+}
+
+
+// Convert Bible reference to clickable pop-up
+function convertBibleReference(match) {
+    // Create a clickable span with data attribute instead of onclick
+    return `<span class="bible-reference" data-verse-ref="${match}" title="Click to read ${match}">${match}</span>`;
+}
+
 // Format text with line breaks for better display
 function formatTextWithLineBreaks(text) {
     if (!text) return '';
     
     // Convert line breaks to HTML and escape HTML
-    return text
+    let formattedText = text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -258,6 +298,112 @@ function formatTextWithLineBreaks(text) {
         .replace(/'/g, '&#39;')
         .replace(/\n/g, '<br>')
         .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+
+    // Make Bible references clickable (always enabled)
+    // Pattern matches: BookName Chapter:Verse or BookName Chapter:Verse-Verse
+    // Examples: "John 3:16", "1 Corinthians 13:4-7", "Genesis 1:1", "Psalm 23:1-6"
+    const bibleRefPattern = /\b(?:(?:[1-3]\s+)?[A-Za-z]+(?:\s+of\s+[A-Za-z]+)?)\s+\d+:\d+(?:[-–]\d+)?\b/g;
+    
+    
+    formattedText = formattedText.replace(bibleRefPattern, convertBibleReference);
+    
+    return formattedText;
+}
+
+// Show Bible verse in a popup modal
+function showVersePopup(reference) {
+    // Show loading state
+    const existingModal = document.getElementById('verseModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal fade" id="verseModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-book-open me-2"></i>
+                            <span id="verseReference">Loading...</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="verseContent" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Fetching verse...</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <small class="text-muted me-auto" id="verseVersion"></small>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="openBibleGateway('${reference}')">
+                            <i class="fas fa-external-link-alt me-1"></i>Open in Bible Gateway
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('verseModal'));
+    modal.show();
+    
+    // Fetch verse content
+    fetch(`/api/fetch-verse?reference=${encodeURIComponent(reference)}`)
+        .then(response => response.json())
+        .then(data => {
+            const referenceEl = document.getElementById('verseReference');
+            const contentEl = document.getElementById('verseContent');
+            const versionEl = document.getElementById('verseVersion');
+            
+            if (data.success) {
+                referenceEl.textContent = data.data.reference;
+                contentEl.innerHTML = `<div class="verse-text">${data.data.text.replace(/\n/g, '<br>')}</div>`;
+                versionEl.textContent = data.data.version;
+            } else {
+                referenceEl.textContent = reference;
+                contentEl.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error: ${data.error}
+                    </div>
+                `;
+                versionEl.textContent = '';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching verse:', error);
+            const referenceEl = document.getElementById('verseReference');
+            const contentEl = document.getElementById('verseContent');
+            
+            referenceEl.textContent = reference;
+            contentEl.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Failed to fetch verse. Please try again.
+                </div>
+            `;
+        });
+    
+    // Clean up modal when hidden
+    document.getElementById('verseModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+// Open Bible Gateway as fallback
+function openBibleGateway(reference) {
+    const url = `https://www.biblegateway.com/passage/?search=${encodeURIComponent(reference)}&version=ESV`;
+    window.open(url, '_blank');
 }
 
 // Show auto-save notification
@@ -272,7 +418,7 @@ function showAutoSaveNotification(filename) {
             <div class="toast-body">
                 <i class="fas fa-check-circle me-2"></i>Results auto-saved to: ${filename}
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="modal"></button>
         </div>
     `;
     

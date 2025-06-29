@@ -3,24 +3,24 @@
 
 databases:
   '1001':
-    name: "Tim Warner Teaching"
-    description: "This is all of the great articles, blog entries, PDFs and his LGV bible Translations"
+    name: "Apostolic Monotheism"
+    description: "Contains what the Apostles taught and wrote about the Monotheism Gospel"
     created_date: '2025-06-27'
     
   '1002':
-    name: "General Christian Teaching"
-    description: "This is all of the great articles, blog entries, PDFs and that I have come across in all my years of research"
+    name: "Christian Teaching"
+    description: "Contains articles, blog entries, Docx Files collected over the years of research"
     created_date: '2025-06-27'
     
   '1003':
     name: "Eschatology"
-    description: "This has all the articles, blog entries, PDFs and that I have come across linked to Eschatology"
+    description: "End Times Prophecy and Understanding for all"
     created_date: '2025-06-27'
     
   '1004':
     name: "Islamic End Times"
-    description: "This has all the articles, blog entries, PDFs and that I have come across linked to Islamic End Times Paradigm"
+    description: "Covers the Islamic End Times Paradigm from both a Muslim and Christian Perspective"
     created_date: '2025-06-27'
 default_database: 1001
 registry_version: '1.0'
-last_updated: '2025-06-27T13:51:02.023037'
+last_updated: '2025-06-27'

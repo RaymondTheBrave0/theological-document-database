@@ -211,6 +211,143 @@ def export_results():
             'error': str(e)
         }), 500
 
+
+@app.route('/api/fetch-verse')
+def fetch_verse():
+    """Fetch Bible verse text using ESV API"""
+    try:
+        reference = request.args.get('reference')
+        
+        if not reference:
+            return jsonify({
+                'success': False,
+                'error': 'Reference parameter is required'
+            }), 400
+        
+        # ESV API Configuration
+        ESV_API_KEY = "170fa0e450e67f5ee7be4c40b3c3005858a92392"
+        ESV_API_BASE = "https://api.esv.org/v3"
+        
+        headers = {
+            'Authorization': f'Token {ESV_API_KEY}'
+        }
+        
+        params = {
+            'q': reference,
+            'include-headings': False,
+            'include-footnotes': False,
+            'include-verse-numbers': True,
+            'include-short-copyright': False,
+            'include-passage-references': True
+        }
+        
+        import requests
+        response = requests.get(f'{ESV_API_BASE}/passage/text/', 
+                              headers=headers, 
+                              params=params,
+                              timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('passages') and len(data['passages']) > 0:
+                passage = data['passages'][0].strip()
+                # Clean up the text
+                passage = passage.replace('\n\n', '\n').strip()
+                return jsonify({
+                    'success': True,
+                    'data': {
+                        'text': passage,
+                        'reference': reference,
+                        'version': 'ESV - English Standard Version'
+                    }
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': f'No text found for "{reference}"'
+                })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'API Error: {response.status_code}'
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/bible-books')
+def get_bible_books():
+    """Get Bible book abbreviations from JSON file"""
+    try:
+        bible_books_path = Path(__file__).parent / 'bible_books.json'
+        
+        if not bible_books_path.exists():
+            return jsonify({
+                'success': False,
+                'error': 'Bible books configuration not found'
+            }), 404
+        
+        with open(bible_books_path, 'r', encoding='utf-8') as f:
+            bible_books = json.load(f)
+        
+        # Create a case-insensitive lookup map with common variations
+        book_map = {}
+        for full_name, abbrev in bible_books.items():
+            # Add the exact name (lowercase)
+            book_map[full_name.lower()] = abbrev
+            
+            # Add common abbreviations and variations
+            if full_name == 'Psalms':
+                book_map['psalm'] = abbrev
+                book_map['ps'] = abbrev
+                book_map['psa'] = abbrev
+            elif full_name == 'Song of Solomon':
+                book_map['song of songs'] = abbrev
+                book_map['song'] = abbrev
+                book_map['sos'] = abbrev
+            elif full_name == 'Ecclesiastes':
+                book_map['ecc'] = abbrev
+                book_map['eccl'] = abbrev
+            elif full_name == 'Revelation':
+                book_map['revelations'] = abbrev
+                book_map['rev'] = abbrev
+            
+            # Add variations for numbered books
+            if full_name.startswith(('1 ', '2 ', '3 ')):
+                number = full_name[0]
+                book_name = full_name[2:].lower()
+                # Without space: "1corinthians"
+                book_map[f'{number}{book_name}'] = abbrev
+                # Short form: "1 cor", "1cor"
+                if book_name in ['corinthians', 'thessalonians', 'chronicles']:
+                    short = book_name[:3]
+                    book_map[f'{number} {short}'] = abbrev
+                    book_map[f'{number}{short}'] = abbrev
+                elif book_name in ['samuel', 'timothy']:
+                    short = book_name[:3]
+                    book_map[f'{number} {short}'] = abbrev
+                    book_map[f'{number}{short}'] = abbrev
+                elif book_name == 'kings':
+                    book_map[f'{number} kgs'] = abbrev
+                    book_map[f'{number}kgs'] = abbrev
+                elif book_name in ['peter', 'john']:
+                    book_map[f'{number} {book_name[:3]}'] = abbrev
+                    book_map[f'{number}{book_name[:3]}'] = abbrev
+        
+        return jsonify({
+            'success': True,
+            'data': book_map
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 # SocketIO events for real-time features
 @socketio.on('connect')
 def handle_connect():
@@ -411,7 +548,7 @@ def main():
         
         try:
             # Run the application with all output suppressed
-            socketio.run(app, host=host, port=port, debug=False, log_output=False, use_reloader=False)
+            socketio.run(app, host=host, port=port, debug=False, log_output=False, use_reloader=False, allow_unsafe_werkzeug=True)
         finally:
             # Restore output streams
             sys.stdout = original_stdout
